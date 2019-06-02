@@ -1,6 +1,8 @@
 clear all
-en = readNPY('trop_RHT_7km_pmax_psum_endjf.npy');
-ln = readNPY('trop_RHT_7km_pmax_psum_lndjf.npy');
+% en = readNPY('trop_temps_pmax_psum_endjf.npy');
+% ln = readNPY('trop_temps_pmax_psum_lndjf.npy');
+en = readNPY('trop_RHTW_5km_pmax_psum_endjf.npy');
+ln = readNPY('trop_RHTW_5km_pmax_psum_lndjf.npy');
 
 % save the values read in from the numpy files
 eps = 0.01802/0.02897;
@@ -10,23 +12,33 @@ sstEN = en(3,:);
 sstLN = ln(3,:);
 rhEN = en(9,:)./(eps.*SATVPLIQUID(en(8,:))./(40613 - SATVPLIQUID(en(8,:))));
 rhLN = ln(9,:)./(eps.*SATVPLIQUID(ln(8,:))./(40613 - SATVPLIQUID(ln(8,:))));
+qvEN = en(9,:);
+qvLN = ln(9,:);
+wEN = en(10,:);
+wLN = ln(10,:);
 
 % filter for instances where pmax is non-zero and there is underlying SST
-ii = find(~isnan(pmaxEN) & pmaxEN ~= 0 & sstEN > 0);
+ii = find(~isnan(pmaxEN) & pmaxEN ~= 0 & sstEN > 0 & rhEN < 1);
 pmaxEN = pmaxEN(ii);
 t2mEN = en(1,ii);
 sktEN = en(2,ii);
 sstEN = en(3,ii);
 dptEN = en(4,ii);
 depthEN = sstEN - en(5,ii);
+rhEN = rhEN(ii);
+qvEN = qvEN(ii);
+wEN = wEN(ii);
 
-ii = find(~isnan(pmaxLN) & pmaxLN ~= 0 & sstLN > 0);
+ii = find(~isnan(pmaxLN) & pmaxLN ~= 0 & sstLN > 0  & rhLN < 1);
 pmaxLN = pmaxLN(ii);
 t2mLN = ln(1,ii);
 sktLN = ln(2,ii);
 sstLN = ln(3,ii);
 dptLN = ln(4,ii);
 depthLN = sstLN - ln(5,ii);
+rhLN = rhLN(ii);
+qvLN = qvLN(ii);
+wLN = wLN(ii);
 clear ii
 
 %%
@@ -41,6 +53,12 @@ dpt = struct('ENd1',0,'ENd2',0,'ENd3',0,'LNd1',0,'LNd2',0','LNd3',0,...
     'EN99d1',0,'EN99d2',0,'EN99d3',0,'LN99d1',0,'LN99d2',0,'LN99d3',0);
 skt = struct('ENd1',0,'ENd2',0,'ENd3',0,'LNd1',0,'LNd2',0','LNd3',0,...
     'EN99d1',0,'EN99d2',0,'EN99d3',0,'LN99d1',0,'LN99d2',0,'LN99d3',0);
+rh = struct('ENd1',0,'ENd2',0,'ENd3',0,'LNd1',0,'LNd2',0','LNd3',0,...
+    'EN99d1',0,'EN99d2',0,'EN99d3',0,'LN99d1',0,'LN99d2',0,'LN99d3',0);
+qv = struct('ENd1',0,'ENd2',0,'ENd3',0,'LNd1',0,'LNd2',0','LNd3',0,...
+    'EN99d1',0,'EN99d2',0,'EN99d3',0,'LN99d1',0,'LN99d2',0,'LN99d3',0);
+w = struct('ENd1',0,'ENd2',0,'ENd3',0,'LNd1',0,'LNd2',0','LNd3',0,...
+    'EN99d1',0,'EN99d2',0,'EN99d3',0,'LN99d1',0,'LN99d2',0,'LN99d3',0);
 
 d1 = find(depthEN < 65);
 d2 = find(depthEN >= 65 & depthEN < 85);
@@ -50,6 +68,9 @@ t2m.ENd1 = t2mEN(d1); t2m.ENd2 = t2mEN(d2); t2m.ENd3 = t2mEN(d3);
 sst.ENd1 = sstEN(d1); sst.ENd2 = sstEN(d2); sst.ENd3 = sstEN(d3);
 dpt.ENd1 = dptEN(d1); dpt.ENd2 = dptEN(d2); dpt.ENd3 = dptEN(d3);
 skt.ENd1 = sktEN(d1); skt.ENd2 = sktEN(d2); skt.ENd3 = sktEN(d3);
+rh.ENd1 = rhEN(d1); rh.ENd2 = rhEN(d2); rh.ENd3 = rhEN(d3);
+qv.ENd1 = qvEN(d1); qv.ENd2 = qvEN(d2); qv.ENd3 = qvEN(d3);
+w.ENd1 = wEN(d1); w.ENd2 = wEN(d2); w.ENd3 = wEN(d3);
 
 d1 = find(depthLN < 65);
 d2 = find(depthLN >= 65 & depthLN < 85);
@@ -59,9 +80,12 @@ t2m.LNd1 = t2mLN(d1); t2m.LNd2 = t2mLN(d2); t2m.LNd3 = t2mLN(d3);
 sst.LNd1 = sstLN(d1); sst.LNd2 = sstLN(d2); sst.LNd3 = sstLN(d3);
 dpt.LNd1 = dptLN(d1); dpt.LNd2 = dptLN(d2); dpt.LNd3 = dptLN(d3);
 skt.LNd1 = sktLN(d1); skt.LNd2 = sktLN(d2); skt.LNd3 = sktLN(d3);
+rh.LNd1 = rhLN(d1); rh.LNd2 = rhLN(d2); rh.LNd3 = rhLN(d3);
+qv.LNd1 = qvLN(d1); qv.LNd2 = qvLN(d2); qv.LNd3 = qvLN(d3);
+w.LNd1 = wLN(d1); w.LNd2 = wLN(d2); w.LNd3 = wLN(d3);
 
 clear d1 d2 d3 pmaxEN pmaxLN t2mEN t2mLN ii depthEN sstEN sstLN depthLN
-clear en ln dptEN dptLN sktEN sktLN
+clear en ln dptEN dptLN sktEN sktLN rhEN rhLN qvEN qvLN
 
 %%
 % separate values into temperature bins and take the maximum 25 precip 
@@ -71,197 +95,189 @@ depth = {'d1','d2','d3'};
 % CHANGE BASED ON WHICH TEMPERATURE TO USE FOR SCALING
 tstruct = sst;
 % CHANGE BASED ON HOW MANY POINTS TO TAKE FROM EACH BIN
-num = 5;
+num = 7;
 % CHANGE BASED ON HOW MANY TEMPERATURE BINS TO SET UP
-num2 = 30;
+num2 = 15;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for ll = 1:3
     % EL NINO
     temps = linspace(min(tstruct.(strcat('EN',depth{ll}))),max(tstruct.(strcat('EN',...
         depth{ll}))),num2);
-    t99 = []; pr99 = []; 
+    t99 = []; pr99 = []; rh99 = []; qv99 = []; w99 = [];
     for ii = 1:length(temps)-1
         jj = find(tstruct.(strcat('EN',depth{ll})) >= temps(ii) & tstruct.(strcat('EN',...
             depth{ll})) < temps(ii+1));
         subset = pr.(strcat('EN',depth{ll}))(jj);
         group = tstruct.(strcat('EN',depth{ll}))(jj);
+        guy = rh.(strcat('EN',depth{ll}))(jj);
+        gal = qv.(strcat('EN',depth{ll}))(jj);
+        kid = w.(strcat('EN',depth{ll}))(jj);
         pr99 = [pr99, maxk(subset,num)];
         t99 = [t99, maxk(group,num)];
+        rh99 = [rh99, maxk(guy,num)];
+        qv99 = [qv99, maxk(gal,num)];
+        w99 = [w99, mink(kid,num)];
     end
     pr.(strcat('EN99',depth{ll})) = pr99; 
     tstruct.(strcat('EN99',depth{ll})) = t99; 
+    rh.(strcat('EN99',depth{ll})) = rh99;
+    qv.(strcat('EN99',depth{ll})) = qv99;
+    w.(strcat('EN99',depth{ll})) = w99;
     
     % LA NINA
     temps = linspace(min(tstruct.(strcat('LN',depth{ll}))),max(tstruct.(strcat('LN',...
         depth{ll}))),num2);
-    t99 = []; pr99 = [];
+    t99 = []; pr99 = []; rh99 = []; qv99 = []; w99 = [];
     for ii = 1:length(temps)-1
         jj = find(tstruct.(strcat('LN',depth{ll})) >= temps(ii) & tstruct.(strcat('LN',...
             depth{ll})) < temps(ii+1));
         subset = pr.(strcat('LN',depth{ll}))(jj);
         group = tstruct.(strcat('LN',depth{ll}))(jj);
+        guy = rh.(strcat('LN',depth{ll}))(jj);
+        gal = qv.(strcat('LN',depth{ll}))(jj);
+        kid = w.(strcat('LN',depth{ll}))(jj);
         pr99 = [pr99, maxk(subset,num)];
         t99 = [t99, maxk(group,num)];
+        rh99 = [rh99, maxk(guy,num)];
+        qv99 = [qv99, maxk(gal,num)];
+        w99 = [w99, mink(kid,num)];
     end
     pr.(strcat('LN99',depth{ll})) = pr99; 
     tstruct.(strcat('LN99',depth{ll})) = t99; 
+    rh.(strcat('LN99',depth{ll})) = rh99;
+    qv.(strcat('LN99',depth{ll})) = qv99;
+    w.(strcat('LN99',depth{ll})) = w99;
 end
-clear depth group subset ii jj ll pr99 t99 temps num num2
+clear depth group subset ii jj ll pr99 t99 temps num num2 guy qv99 rh99 w99
+clear gal kid wEN wLN
 
 %%
 clf
 Opt.Interpreter = 'tex';
 
-figure(10)
-subplot_tight(1,3,1,[0.1 0.05])
+f = figure(10);
+subplot_tight(1,3,1,[0.11 0.07])
 hold on
-ll = find(tstruct.EN99d2 <= 303);
-scatter(tstruct.EN99d2(ll),pr.EN99d2(ll),25,[0 0.95 0],'filled','markeredgecolor','k')
-[fitEN,gofEN,~] = fit(tstruct.EN99d2(ll)',pr.EN99d2(ll)','exp1');
-h = plot(fitEN);
-set(h,'Color',[0 0.9 0],'LineWidth',1.25);
-
-ll = find(tstruct.EN99d2 > 303);
-scatter(tstruct.EN99d2(ll),pr.EN99d2(ll),20,[0 0.95 0],'*')
-[fitEN,~,~] = fit(tstruct.EN99d2(ll)',pr.EN99d2(ll)','exp1');
-h = plot(fitEN);
-set(h,'Color',[0 0.9 0],'LineWidth',1.25,'LineStyle','--');
-
-ll = find(tstruct.LN99d2 <= 300);
-scatter(tstruct.LN99d2(ll),pr.LN99d2(ll),25,[0 0.35 0],'filled','d',...
+scatter(tstruct.EN99d2,log(pr.EN99d2),rh.EN99d2.*30,[0 0.95 0],'filled',...
     'markeredgecolor','k')
-[fitLN,gofLN,~] = fit(tstruct.LN99d2(ll)',pr.LN99d2(ll)','exp1');
-h = plot(fitLN);
-set(h,'Color',[0 0.35 0],'LineWidth',1.25);
+[dataout, ~, ~, ~] = lowess([tstruct.EN99d2; log(pr.EN99d2)]',0.5,1);
+[peak, peakloc] = max(dataout(:,3));
+plot(dataout(:,1),dataout(:,3),'Color',[0 0.9 0],'LineWidth',1.25);
+plot([dataout(peakloc,1),dataout(peakloc,1)],[log(0.1),peak],'color',[0 0.95 0],...
+    'linestyle','--')
+r = corrcoef(dataout(:,2),dataout(:,3));
+text(0.05,0.87,sprintf('r_{EN}^2 = %0.3f',r(1,2)),'color',[0 0.95 0],...
+    'fontsize',11,'units','normalized')
 
-ll = find(tstruct.LN99d2 > 300);
-scatter(tstruct.LN99d2(ll),pr.LN99d2(ll),30,[0 0.35 0],'x')
-ll = find(tstruct.LN99d2 > 303);
-[fitLN,~,~] = fit(tstruct.LN99d2(ll)',pr.LN99d2(ll)','exp1');
-h = plot(fitLN);
-set(h,'Color',[0 0.35 0],'LineWidth',1.25,'LineStyle','--');
+scatter(tstruct.LN99d2,log(pr.LN99d2),rh.LN99d2.*30,[0 0.35 0],'filled',...
+    'markeredgecolor','k')
+[dataout, ~, ~, ~] = lowess([tstruct.LN99d2; log(pr.LN99d2)]',0.5,1);
+[peak, peakloc] = max(dataout(:,3));
+plot(dataout(:,1),dataout(:,3),'Color',[0 0.35 0],'LineWidth',1.25);
+plot([dataout(peakloc,1),dataout(peakloc,1)],[log(0.1),peak],'color',[0 0.35 0],...
+    'linestyle','--')
+r = corrcoef(dataout(:,2),dataout(:,3));
+text(0.05,0.8,sprintf('r_{LN}^2 = %0.3f',r(1,2)),'color',[0 0.35 0],...
+    'fontsize',11,'units','normalized')
 
 % Clausius-Clapeyron relation
-Rv = 461.52;        % water vapor gas constant [J kg-1 K-1]
-Lv = 2458.3*1000;   % heat of enthalpy [J kg-1]
-xx = linspace(280,310,50);
-plot(xx,exp(-Lv/Rv*(1./xx-1/290)),'color',[0.5 0.5 0.5],...
-        'linestyle','--','handlevisibility','off')
+% xx = linspace(260,310,50);
+% for b = 260:10:320
+%     plot(xx,log(8.73)+0.08.*(xx - b),'color',[0.5 0.5 0.5],...
+%         'linestyle','--','handlevisibility','off')
+% end
 
 text(0.05,0.95,'\bf{a}','fontsize',16,'units','normalized')
-text(0.45,0.3,sprintf('r_{EN}^2 = %0.3f',gofEN.rsquare),'color',[0 0.95 0],...
-    'fontsize',11,'units','normalized')
-text(0.45,0.23,sprintf('RMSE_{EN} = %0.3f',gofEN.rmse),'color',[0 0.95 0],...
-    'fontsize',11,'units','normalized')
-text(0.45,0.16,sprintf('r_{LN}^2 = %0.3f',gofLN.rsquare),'color',[0 0.35 0],...
-    'fontsize',11,'units','normalized')
-text(0.45,0.09,sprintf('RMSE_{LN} = %0.3f',gofLN.rmse),'color',[0 0.35 0],...
-    'fontsize',11,'units','normalized')
-
 legend('off')
 xlabel('Underlying SST [K]')
 ylabel('P_{max} [mm h^{-1}]')
-set(gca,'yscale','log','fontsize',13)
-ylim([0.1 150])
+ss = num2str([exp(-1); exp(0); exp(1); exp(2); exp(3); exp(4); exp(5)],3);
+set(gca,'fontsize',13,'yticklabel',ss)
+ylim([-1 5.5])
 
-%%
+%     ,m/.%%
 subplot_tight(1,3,2,[0.1 0.05])
 hold on
-ll = find(tstruct.EN99d1 <= 295);
-scatter(tstruct.EN99d1(ll),pr.EN99d1(ll),25,[0 0 1],'filled','markeredgecolor','k')
-[fitEN,gofEN,~] = fit(tstruct.EN99d1(ll)',pr.EN99d1(ll)','exp1');
-h = plot(fitEN);
-set(h,'Color',[0 0 1],'LineWidth',1.25);
+scatter(tstruct.EN99d1,log(pr.EN99d1),rh.EN99d1.*30,[0 0 1],'filled',...
+    'markeredgecolor','k')
+[dataout, ~, ~, ~] = lowess([tstruct.EN99d1; log(pr.EN99d1)]',0.5,1);
+[peak, peakloc] = max(dataout(:,3));
+plot(dataout(:,1),dataout(:,3),'Color',[0 0 1],'LineWidth',1.25);
+plot([dataout(peakloc,1),dataout(peakloc,1)],[log(0.1),peak],'Color',[0 0 1],...
+    'linestyle','--')
+r = corrcoef(dataout(:,2),dataout(:,3));
+text(0.05,0.87,sprintf('r_{EN}^2 = %0.3f',r(1,2)),'color',[0 0 1],...
+    'fontsize',11,'units','normalized')
 
-ll = find(tstruct.EN99d1 > 295);
-scatter(tstruct.EN99d1(ll),pr.EN99d1(ll),25,[0 0 1],'*')
-[fitEN,~,~] = fit(tstruct.EN99d1(ll)',pr.EN99d1(ll)','exp1');
-h = plot(fitEN);
-set(h,'Color',[0 0 1],'LineWidth',1.25,'LineStyle','--');
+scatter(tstruct.LN99d1,log(pr.LN99d1),rh.LN99d1.*30,[0 0 0.5],'filled',...
+    'd','markeredgecolor','k')
+[dataout, ~, ~, ~] = lowess([tstruct.LN99d1; log(pr.LN99d1)]',0.5,1);
+[peak, peakloc] = max(dataout(:,3));
+plot(dataout(:,1),dataout(:,3),'Color',[0 0 0.5],'LineWidth',1.25);
+plot([dataout(peakloc,1),dataout(peakloc,1)],[log(0.1),peak],'Color',[0 0 0.5],...
+    'linestyle','--')
+r = corrcoef(dataout(:,2),dataout(:,3));
+text(0.05,0.8,sprintf('r_{LN}^2 = %0.3f',r(1,2)),'color',[0 0 0.5],...
+    'fontsize',11,'units','normalized')
 
-ll = find(tstruct.LN99d1 <= 295);
-scatter(tstruct.LN99d1(ll),pr.LN99d1(ll),25,[0 0 0.5],'filled','d','markeredgecolor','k')
-[fitLN,gofLN,~] = fit(tstruct.LN99d1(ll)',pr.LN99d1(ll)','exp1');
-h = plot(fitLN);
-set(h,'Color',[0 0 0.5],'LineWidth',1.25);
-
-ll = find(tstruct.LN99d1 > 295);
-scatter(tstruct.LN99d1(ll),pr.LN99d1(ll),25,[0 0 0.5],'x')
-[fitLN,~,~] = fit(tstruct.LN99d1(ll)',pr.LN99d1(ll)','exp1');
-h = plot(fitLN);
-set(h,'Color',[0 0 0.5],'LineWidth',1.25,'LineStyle','--');
-
-Rv = 461.52;   % water vapor gas constant [J kg-1 K-1]
-Lv = 2458.3*1000;   % heat of enthalpy [J kg-1]
-xx = linspace(280,310,50);
-plot(xx,exp(-Lv/Rv*(1./xx-1/290)),'color',[0.5 0.5 0.5],...
-        'linestyle','--','handlevisibility','off')
-    
+% Clausius-Clapeyron relation
+% xx = linspace(260,310,50);
+% for b = 260:10:320
+%     plot(xx,log(8.73)+0.07.*(xx - b),'color',[0.5 0.5 0.5],...
+%         'linestyle','--','handlevisibility','off')
+% end
+        
 text(0.05,0.95,'\bf{b}','fontsize',16,'units','normalized')
-text(0.45,0.3,sprintf('r_{EN}^2 = %0.3f',gofEN.rsquare),'color',[0 0 1],...
-    'fontsize',11,'units','normalized')
-text(0.45,0.23,sprintf('RMSE_{EN} = %0.3f',gofEN.rmse),'color',[0 0 1],...
-    'fontsize',11,'units','normalized')
-text(0.45,0.16,sprintf('r_{LN}^2 = %0.3f',gofLN.rsquare),'color',[0 0 0.5],...
-    'fontsize',11,'units','normalized')   
-text(0.45,0.09,sprintf('RMSE_{LN} = %0.3f',gofLN.rmse),'color',[0 0 0.5],...
-    'fontsize',11,'units','normalized')   
 legend('off')
-
 xlabel('Underlying SST [K]'); ylabel('');
-set(gca,'yscale','log','fontsize',13)
-ylim([0.1 150])
+ss = num2str([exp(-1); exp(0); exp(1); exp(2); exp(3); exp(4); exp(5)],3);
+set(gca,'fontsize',13,'yticklabel',ss)
+ylim([-1 5.5])
 
 %%
 subplot_tight(1,3,3,[0.1 0.05])
 hold on
+scatter(tstruct.EN99d3,log(pr.EN99d3),rh.EN99d3.*30,[1 0 0],'filled',...
+    'markeredgecolor','k')
+[dataout, ~, ~, ~] = lowess([tstruct.EN99d3; log(pr.EN99d3)]',0.5,1);
+[peak, peakloc] = max(dataout(:,3));
+plot(dataout(:,1),dataout(:,3),'Color',[1 0 0],'LineWidth',1.25);
+plot([dataout(peakloc,1),dataout(peakloc,1)],[log(0.1),peak],'Color',[1 0 0],...
+    'linestyle','--')
+r = corrcoef(dataout(:,2),dataout(:,3));
+text(0.05,0.87,sprintf('r_{EN}^2 = %0.3f',r(1,2)),'color',[1 0 0],...
+    'fontsize',11,'units','normalized')
 
-ll = find(tstruct.EN99d3 <= 304);
-scatter(tstruct.EN99d3(ll),pr.EN99d3(ll),25,[1 0 0],'filled','markeredgecolor','k')
-[fitEN,gofEN,~] = fit(tstruct.EN99d3(ll)',pr.EN99d3(ll)','exp1');
-h = plot(fitEN);
-set(h,'Color',[1 0 0],'LineWidth',1.25);
+scatter(tstruct.LN99d3,log(pr.LN99d3),rh.LN99d3.*30,[0.5 0 0],'filled',...
+    'markeredgecolor','k')
+[dataout, ~, ~, ~] = lowess([tstruct.LN99d3; log(pr.LN99d3)]',0.5,1);
+[peak, peakloc] = max(dataout(:,3));
+plot(dataout(:,1),dataout(:,3),'Color',[0.5 0 0],'LineWidth',1.25);
+plot([dataout(peakloc,1),dataout(peakloc,1)],[log(0.1),peak],'Color',[0.5 0 0],...
+    'linestyle','--')
+text(0.05,0.8,sprintf('r_{LN}^2 = %0.3f',r(1,2)),'color',[0.5 0 0],...
+    'fontsize',11,'units','normalized')
 
-ll = find(tstruct.EN99d3 > 304);
-scatter(tstruct.EN99d3(ll),pr.EN99d3(ll),25,[1 0 0],'*')
-[fitEN,~,~] = fit(tstruct.EN99d3(ll)',pr.EN99d3(ll)','exp1');
-h = plot(fitEN);
-set(h,'Color',[1 0 0],'LineWidth',1.25,'LineStyle','--');
-
-ll = find(tstruct.LN99d3 <= 300);
-scatter(tstruct.LN99d3(ll),pr.LN99d3(ll),25,[0.5 0 0],'filled','d','markeredgecolor','k')
-[fitLN,gofLN,~] = fit(tstruct.LN99d3(ll)',pr.LN99d3(ll)','exp1');
-h = plot(fitLN);
-set(h,'Color',[0.5 0 0],'LineWidth',1.25);
-
-ll = find(tstruct.LN99d3 > 300);
-scatter(tstruct.LN99d3(ll),pr.LN99d3(ll),30,[0.5 0 0],'x')
-[fitLN,~,~] = fit(tstruct.LN99d3(ll)',pr.LN99d3(ll)','exp1');
-h = plot(fitLN);
-set(h,'Color',[0.5 0 0],'LineWidth',1.25,'LineStyle','--');
-
+% Clausius-Clapeyron relation
 Rv = 461.52;   % water vapor gas constant [J kg-1 K-1]
-Lv = 2458.3*1000;   % heat of enthalpy [J kg-1]
-xx = linspace(280,310,50);
-plot(xx,exp(-Lv/Rv*(1./xx-1/290)),'color',[0.5 0.5 0.5],...
-        'linestyle','--','handlevisibility','off')
-
+% Lv = 2458.3*1000;   % heat of enthalpy [J kg-1]
+% xx = linspace(280,310,50);
+% plot(xx,-Lv/Rv*(1./xx-1/290),'color',[0.5 0.5 0.5],...
+%         'linestyle','--','handlevisibility','off')
+% xx = linspace(260,310,50);
+% for b = 260:10:320
+%     plot(xx,log(8.73)+0.07.*(xx - b),'color',[0.5 0.5 0.5],...
+%         'linestyle','--','handlevisibility','off')
+% end
 text(0.05,0.95,'\bf{c}','fontsize',16,'units','normalized')
-text(0.55,0.3,sprintf('r_{EN}^2 = %0.3f',gofEN.rsquare),'color',[1 0 0],...
-    'fontsize',11,'units','normalized')
-text(0.55,0.23,sprintf('RMSE_{EN} = %0.3f',gofEN.rmse),'color',[1 0 0],...
-    'fontsize',11,'units','normalized')
-text(0.55,0.16,sprintf('r_{LN}^2 = %0.3f',gofLN.rsquare),'color',[0.5 0 0],...
-    'fontsize',11,'units','normalized')   
-text(0.55,0.09,sprintf('RMSE_{LN} = %0.3f',gofLN.rmse),'color',[0.5 0 0],...
-    'fontsize',11,'units','normalized')   
-legend('off')
-    
+legend('off') 
 xlabel('Underlying SST [K]'); ylabel('');
-set(gca,'yscale','log','fontsize',13)
-ylim([0.1 150])
+ss = num2str([exp(-1); exp(0); exp(1); exp(2); exp(3); exp(4); exp(5)],3);
+set(gca,'fontsize',13,'yticklabel',ss)
+ylim([-1 5.5])
 legend('off')
 
 orient(gcf,'landscape')
+f.Units = 'inches';
 set(gcf,'PaperPosition',[0.25,0.1,11,4.5])
-% print(gcf,'-dpdf','-r250','CC-scalings-sst-redone2')  %'-bestfit
+% print(gcf,'-dpdf','-r250','CC-scalings-sst-redone4')  %'-bestfit

@@ -93,120 +93,98 @@ clear en ln dptEN dptLN sktEN sktLN rhEN rhLN qvEN qvLN capeEN capeLN
 % values from each
 depth = {'d1','d2','d3'};
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% CHANGE BASED ON WHICH TEMPERATURE TO USE FOR SCALING
+% WHICH TEMPERATURE TO USE FOR SCALING
 tstruct = sst;
-% CHANGE BASED ON HOW MANY POINTS TO TAKE FROM EACH BIN
-num = 5;
-% CHANGE BASED ON HOW MANY TEMPERATURE BINS TO SET UP
-num2 = 25;
+% HOW MANY CAPE BINS TO SET UP
+num = 10;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for ll = 1:3
     % EL NINO
-    temps = linspace(min(cape.(strcat('EN',depth{ll}))),max(cape.(strcat('EN',...
-        depth{ll}))),num2);
-%     temps = linspace(min(tstruct.(strcat('EN',depth{ll}))),max(tstruct.(strcat('EN',...
-%         depth{ll}))),num2);
-    t99 = []; pr99 = []; rh99 = []; qv99 = []; w99 = []; cape99 = [];
+    temps = linspace(100,3500,num);
+    t99 = []; pr99 = []; rh99 = []; qv99 = []; cape99 = [];
     for ii = 1:length(temps)-1
         jj = find(cape.(strcat('EN',depth{ll})) >= temps(ii) & cape.(strcat('EN',...
             depth{ll})) < temps(ii+1));
-%         jj = find(tstruct.(strcat('EN',depth{ll})) >= temps(ii) & tstruct.(strcat('EN',...
-%             depth{ll})) < temps(ii+1));
-        subset = pr.(strcat('EN',depth{ll}))(jj);
-        group = tstruct.(strcat('EN',depth{ll}))(jj);
-        guy = rh.(strcat('EN',depth{ll}))(jj);
-        gal = qv.(strcat('EN',depth{ll}))(jj);
-        kid = w.(strcat('EN',depth{ll}))(jj);
-        loser = cape.(strcat('EN',depth{ll}))(jj);
         
-        [prpr,jj] = maxk(subset,num);
-        pr99 = [pr99, prpr];
-        t99 = [t99, group(jj)];
-        rh99 = [rh99, guy(jj)];
-        qv99 = [qv99, gal(jj)];
-        w99 = [w99, kid(jj)];
-        cape99 = [cape99, loser(jj)]; %maxk(loser,num)
+        % calculate the quantiles of the subsets in this bin
+        qpr = quantile(pr.(strcat('EN',depth{ll}))(jj),[0.2 0.4 0.6 0.8]);
+        qt = quantile(tstruct.(strcat('EN',depth{ll}))(jj),[0.2 0.4 0.6 0.8]);
+        qrh = quantile(rh.(strcat('EN',depth{ll}))(jj),[0.2 0.4 0.6 0.8]);
+        qqv = quantile(qv.(strcat('EN',depth{ll}))(jj),[0.2 0.4 0.6 0.8]);
+        qca = quantile(cape.(strcat('EN',depth{ll}))(jj),[0.2 0.4 0.6 0.8]);
+        
+        % append the quantiles to their respective lists
+        pr99 = [pr99; qpr];
+        t99 = [t99; qt];
+        rh99 = [rh99; qrh];
+        qv99 = [qv99; qqv];
+        cape99 = [cape99; qca];
     end
     pr.(strcat('EN99',depth{ll})) = pr99; 
     tstruct.(strcat('EN99',depth{ll})) = t99; 
     rh.(strcat('EN99',depth{ll})) = rh99;
     qv.(strcat('EN99',depth{ll})) = qv99;
-    w.(strcat('EN99',depth{ll})) = w99;
     cape.(strcat('EN99',depth{ll})) = cape99;
     
     % LA NINA
-    temps = linspace(min(cape.(strcat('LN',depth{ll}))),max(cape.(strcat('LN',...
-        depth{ll}))),num2);
-%     temps = linspace(min(tstruct.(strcat('LN',depth{ll}))),max(tstruct.(strcat('LN',...
-%         depth{ll}))),num2);
-    t99 = []; pr99 = []; rh99 = []; qv99 = []; w99 = []; cape99 = [];
+    temps = linspace(100,3500,num);
+    t99 = []; pr99 = []; rh99 = []; qv99 = []; cape99 = [];
     for ii = 1:length(temps)-1
         jj = find(cape.(strcat('LN',depth{ll})) >= temps(ii) & cape.(strcat('LN',...
             depth{ll})) < temps(ii+1));
-%         jj = find(tstruct.(strcat('EN',depth{ll})) >= temps(ii) & tstruct.(strcat('EN',...
-%             depth{ll})) < temps(ii+1));
-        subset = pr.(strcat('LN',depth{ll}))(jj);
-        group = tstruct.(strcat('LN',depth{ll}))(jj);
-        guy = rh.(strcat('LN',depth{ll}))(jj);
-        gal = qv.(strcat('LN',depth{ll}))(jj);
-        kid = w.(strcat('LN',depth{ll}))(jj);
-        loser = cape.(strcat('LN',depth{ll}))(jj);
+
+        % calculate the quantiles of the subsets in this bin
+        qpr = quantile(pr.(strcat('LN',depth{ll}))(jj),[0.2 0.4 0.6 0.8]);
+        qt = quantile(tstruct.(strcat('LN',depth{ll}))(jj),[0.2 0.4 0.6 0.8]);
+        qrh = quantile(rh.(strcat('LN',depth{ll}))(jj),[0.2 0.4 0.6 0.8]);
+        qqv = quantile(qv.(strcat('LN',depth{ll}))(jj),[0.2 0.4 0.6 0.8]);
+        qca = quantile(cape.(strcat('LN',depth{ll}))(jj),[0.2 0.4 0.6 0.8]);
         
-        [prpr,jj] = maxk(subset,num);
-        pr99 = [pr99, prpr];
-        t99 = [t99, group(jj)];
-        rh99 = [rh99, guy(jj)];
-        qv99 = [qv99, gal(jj)];
-        w99 = [w99, kid(jj)];
-        cape99 = [cape99, loser(jj)]; %maxk(loser,num)
+        % append the quantiles to their respective lists
+        pr99 = [pr99; qpr];
+        t99 = [t99; qt];
+        rh99 = [rh99; qrh];
+        qv99 = [qv99; qqv];
+        cape99 = [cape99; qca];
     end
     pr.(strcat('LN99',depth{ll})) = pr99; 
     tstruct.(strcat('LN99',depth{ll})) = t99; 
     rh.(strcat('LN99',depth{ll})) = rh99;
     qv.(strcat('LN99',depth{ll})) = qv99;
-    w.(strcat('LN99',depth{ll})) = w99;
     cape.(strcat('LN99',depth{ll})) = cape99;
 end
 clear depth group subset ii jj ll pr99 t99 temps num num2 guy qv99 rh99 w99
 clear gal kid wEN wLN cape99 loser
-%%
 
+%%
 clf
 Opt.Interpreter = 'tex';
 
 f = figure(10);
-subplot_tight(1,2,1,[0.1 0.075])
+subplot_tight(1,3,1,[0.11 0.07])
 hold on
 scatter(log(cape.EN99d2),log(pr.EN99d2),rh.EN99d2.*30,[0 0.95 0],'filled',...
     'markeredgecolor','k')
 P1 = polyfit(log(cape.EN99d2),log(pr.EN99d2),1);
-plot(log(cape.EN99d2),P1(1)*log(cape.EN99d2)+P1(2),'Color',[0 0.9 0],'LineWidth',0.5);
+plot(log(cape.EN99d2),P1(1)*log(cape.EN99d2)+P1(2),'Color',[0 0.9 0],'LineWidth',1.25);
+r = corrcoef(P1(1)*log(cape.EN99d2)+P1(2),log(pr.EN99d2));
+text(0.05,0.87,sprintf('r_{EN}^2 = %0.3f',r(1,2)),'color',[0 0.95 0],...
+    'fontsize',11,'units','normalized')
 
+P2 = polyfit(log(cape.LN99d2),log(pr.LN99d2),1);
+plot(log(cape.LN99d2),P2(1)*log(cape.LN99d2)+P2(2),'Color',[0 0.35 0],'LineWidth',1.25);
 scatter(log(cape.LN99d2),log(pr.LN99d2),rh.LN99d2.*30,[0 0.35 0],'filled',...
     'markeredgecolor','k')
-P2 = polyfit(log(cape.LN99d2),log(pr.LN99d2),1);
-plot(log(cape.LN99d2),P2(1)*log(cape.LN99d2)+P2(2),'Color',[0 0.35 0],'LineWidth',0.5);
+r = corrcoef(P2(1)*log(cape.LN99d2)+P2(2),log(pr.LN99d2));
+text(0.05,0.8,sprintf('r_{LN}^2 = %0.3f',r(1,2)),'color',[0 0.35 0],...
+    'fontsize',11,'units','normalized')
 
-scatter(log(cape.EN99d1),log(pr.EN99d1),rh.EN99d1.*30,[0 0 1],'filled',...
-    'markeredgecolor','k')
-P3 = polyfit(log(cape.EN99d1),log(pr.EN99d1),1);
-plot(log(cape.EN99d1),P3(1)*log(cape.EN99d1)+P3(2),'Color',[0 0 1],'LineWidth',0.5);
+% Clausius-Clapeyron relation
+xx = linspace(100,5000,50);
+plot(log(xx),-8+1.5.*(log(xx)),'color',[0.5 0.5 0.5],...
+    'linestyle','--','handlevisibility','off')
 
-scatter(log(cape.LN99d1),log(pr.LN99d1),rh.LN99d1.*30,[0 0 0.5],'filled',...
-    'd','markeredgecolor','k')
-P4 = polyfit(log(cape.LN99d1),log(pr.LN99d1),1);
-plot(log(cape.LN99d1),P4(1)*log(cape.LN99d1)+P4(2),'Color',[0 0 0.5],'LineWidth',0.5);
-
-scatter(log(cape.EN99d3),log(pr.EN99d3),rh.EN99d3.*30,[1 0 0],'filled',...
-    'markeredgecolor','k')
-P5 = polyfit(log(cape.EN99d3),log(pr.EN99d3),1);
-plot(log(cape.EN99d3),P5(1)*log(cape.EN99d3)+P5(2),'Color',[1 0 0],'LineWidth',0.5);
-
-scatter(log(cape.LN99d3),log(pr.LN99d3),rh.LN99d3.*30,[0.5 0 0],'filled',...
-    'markeredgecolor','k')
-P6 = polyfit(log(cape.LN99d3),log(pr.LN99d3),1);
-plot(log(cape.LN99d3),P6(1)*log(cape.LN99d3)+P6(2),'Color',[0.5 0 0],'LineWidth',0.5);
-
+text(0.05,0.95,'\bf{a}','fontsize',16,'units','normalized')
 legend('off')
 xlabel('CAPE [J kg^{-1}]')
 ylabel('P_{max} [mm h^{-1}]')
@@ -214,31 +192,72 @@ ss = num2str([exp(-1); exp(0); exp(1); exp(2); exp(3); exp(4); exp(5)],3);
 tt = num2str([exp(6); exp(6.5); exp(7); exp(7.5); exp(8); exp(8.5); exp(9)],4);
 set(gca,'fontsize',13,'yticklabel',ss,'xticklabel',tt)
 ylim([0 5.5]); xlim([log(500),log(5500)])
-text(0.05,0.95,'\bf{a}','fontsize',16,'units','normalized')
 
 %%
-subplot_tight(1,2,2,[0.1 0.075])
+subplot_tight(1,3,2,[0.1 0.05])
 hold on
-epac = [cape.EN99d1 cape.LN99d1 cape.EN99d2 cape.LN99d2 cape.EN99d3 cape.LN99d3];
-picerp = [pr.EN99d1 pr.LN99d1 pr.EN99d2 pr.LN99d2 pr.EN99d3 pr.LN99d3];
-hr = [rh.EN99d1 rh.LN99d1 rh.EN99d2 rh.LN99d2 rh.EN99d3 rh.LN99d3];
-scatter(log(epac),log(picerp),hr.*25,'k','filled','markeredgecolor',[1 0.5 0],...
-    'linewidth',0.25)
-P7 = polyfit(log(epac),log(picerp),1);
-plot(log(epac),P7(1)*log(epac)+P7(2),'Color',[0.5 0.5 0.5],'LineWidth',1.25);
-
-r = corrcoef(P7(1)*log(epac)+P7(2),log(picerp));
-text(0.05,0.87,sprintf('r^2 = %0.3f',r(1,2)),'color',[0 0.35 0],...
+scatter(log(cape.EN99d1),log(pr.EN99d1),rh.EN99d1.*30,[0 0 1],'filled',...
+    'markeredgecolor','k')
+P3 = polyfit(log(cape.EN99d1),log(pr.EN99d1),1);
+plot(log(cape.EN99d1),P3(1)*log(cape.EN99d1)+P3(2),'Color',[0 0 1],'LineWidth',1.25);
+r = corrcoef(P3(1)*log(cape.EN99d1)+P3(2),log(pr.EN99d1));
+text(0.05,0.87,sprintf('r_{EN}^2 = %0.3f',r(1,2)),'color',[0 0 1],...
     'fontsize',11,'units','normalized')
 
-xlabel('CAPE [J kg^{-1}]')
+scatter(log(cape.LN99d1),log(pr.LN99d1),rh.LN99d1.*30,[0 0 0.5],'filled',...
+    'd','markeredgecolor','k')
+P4 = polyfit(log(cape.LN99d1),log(pr.LN99d1),1);
+plot(log(cape.LN99d1),P4(1)*log(cape.LN99d1)+P4(2),'Color',[0 0 0.5],'LineWidth',1.25);
+r = corrcoef(P4(1)*log(cape.LN99d1)+P4(2),log(pr.LN99d1));
+text(0.05,0.8,sprintf('r_{LN}^2 = %0.3f',r(1,2)),'color',[0 0 0.5],...
+    'fontsize',11,'units','normalized')
+
+% Clausius-Clapeyron relation
+xx = linspace(100,5000,50);
+plot(log(xx),-2+0.5.*(log(xx)),'color',[0.5 0.5 0.5],...
+    'linestyle','--','handlevisibility','off')
+        
+text(0.05,0.95,'\bf{b}','fontsize',16,'units','normalized')
+legend('off')
+xlabel('CAPE [J kg^{-1}]'); ylabel('');
 ss = num2str([exp(-1); exp(0); exp(1); exp(2); exp(3); exp(4); exp(5)],3);
 tt = num2str([exp(6); exp(6.5); exp(7); exp(7.5); exp(8); exp(8.5); exp(9)],4);
 set(gca,'fontsize',13,'yticklabel',ss,'xticklabel',tt)
 ylim([0 5.5]); xlim([log(500),log(5500)])
-text(0.05,0.95,'\bf{b}','fontsize',16,'units','normalized')
+
+%%
+subplot_tight(1,3,3,[0.1 0.05])
+hold on
+scatter(log(cape.EN99d3),log(pr.EN99d3),rh.EN99d3.*30,[1 0 0],'filled',...
+    'markeredgecolor','k')
+P5 = polyfit(log(cape.EN99d3),log(pr.EN99d3),1);
+plot(log(cape.EN99d3),P5(1)*log(cape.EN99d3)+P5(2),'Color',[1 0 0],'LineWidth',1.25);
+r = corrcoef(P5(1)*log(cape.EN99d3)+P5(2),log(pr.EN99d3));
+text(0.05,0.87,sprintf('r_{EN}^2 = %0.3f',r(1,2)),'color',[1 0 0],...
+    'fontsize',11,'units','normalized')
+
+scatter(log(cape.LN99d3),log(pr.LN99d3),rh.LN99d3.*30,[0.5 0 0],'filled',...
+    'markeredgecolor','k')
+P6 = polyfit(log(cape.LN99d3),log(pr.LN99d3),1);
+plot(log(cape.LN99d3),P6(1)*log(cape.LN99d3)+P6(2),'Color',[0.5 0 0],'LineWidth',1.25);
+r = corrcoef(P6(1)*log(cape.LN99d3)+P6(2),log(pr.LN99d3));
+text(0.05,0.8,sprintf('r_{LN}^2 = %0.3f',r(1,2)),'color',[0.5 0 0],...
+    'fontsize',11,'units','normalized')
+
+% Clausius-Clapeyron relation
+xx = linspace(100,5000,50);
+plot(log(xx),-2+0.5.*(log(xx)),'color',[0.5 0.5 0.5],...
+    'linestyle','--','handlevisibility','off')
+
+text(0.05,0.95,'\bf{c}','fontsize',16,'units','normalized')
+legend('off') 
+xlabel('CAPE [J kg^{-1}]'); ylabel('');
+ss = num2str([exp(-1); exp(0); exp(1); exp(2); exp(3); exp(4); exp(5)],3);
+tt = num2str([exp(6); exp(6.5); exp(7); exp(7.5); exp(8); exp(8.5); exp(9)],4);
+set(gca,'fontsize',13,'yticklabel',ss,'xticklabel',tt)
+ylim([0 5.5]); xlim([log(500),log(5500)])
 
 orient(gcf,'landscape')
 f.Units = 'inches';
-set(gcf,'PaperPosition',[0.25,0.25,9,4.5])
-print(gcf,'-dpdf','-r250','CC-scalings-logCAPE-ALL')
+set(gcf,'PaperPosition',[0.25,0.25,11,4.5])
+% print(gcf,'-dpdf','-r250','CC-scalings-logCAPE')  %'-bestfit

@@ -1,6 +1,4 @@
 clear all
-% en = readNPY('trop_temps_pmax_psum_endjf.npy');
-% ln = readNPY('trop_temps_pmax_psum_lndjf.npy');
 en = readNPY('trop_RHTW_5km_pmax_psum_endjf.npy');
 ln = readNPY('trop_RHTW_5km_pmax_psum_lndjf.npy');
 
@@ -14,8 +12,8 @@ rhEN = en(9,:)./(eps.*SATVPLIQUID(en(8,:))./(40613 - SATVPLIQUID(en(8,:))));
 rhLN = ln(9,:)./(eps.*SATVPLIQUID(ln(8,:))./(40613 - SATVPLIQUID(ln(8,:))));
 qvEN = en(9,:);
 qvLN = ln(9,:);
-wEN = en(10,:);
-wLN = ln(10,:);
+% wEN = en(10,:);
+% wLN = ln(10,:);
 
 % filter for instances where pmax is non-zero and there is underlying SST
 ii = find(~isnan(pmaxEN) & pmaxEN ~= 0 & sstEN > 0 & rhEN < 1);
@@ -27,7 +25,7 @@ dptEN = en(4,ii);
 depthEN = sstEN - en(5,ii);
 rhEN = rhEN(ii);
 qvEN = qvEN(ii);
-wEN = wEN(ii);
+% wEN = wEN(ii);
 
 ii = find(~isnan(pmaxLN) & pmaxLN ~= 0 & sstLN > 0  & rhLN < 1);
 pmaxLN = pmaxLN(ii);
@@ -38,7 +36,7 @@ dptLN = ln(4,ii);
 depthLN = sstLN - ln(5,ii);
 rhLN = rhLN(ii);
 qvLN = qvLN(ii);
-wLN = wLN(ii);
+% wLN = wLN(ii);
 clear ii
 
 %%
@@ -57,8 +55,8 @@ rh = struct('ENd1',0,'ENd2',0,'ENd3',0,'LNd1',0,'LNd2',0','LNd3',0,...
     'EN99d1',0,'EN99d2',0,'EN99d3',0,'LN99d1',0,'LN99d2',0,'LN99d3',0);
 qv = struct('ENd1',0,'ENd2',0,'ENd3',0,'LNd1',0,'LNd2',0','LNd3',0,...
     'EN99d1',0,'EN99d2',0,'EN99d3',0,'LN99d1',0,'LN99d2',0,'LN99d3',0);
-w = struct('ENd1',0,'ENd2',0,'ENd3',0,'LNd1',0,'LNd2',0','LNd3',0,...
-    'EN99d1',0,'EN99d2',0,'EN99d3',0,'LN99d1',0,'LN99d2',0,'LN99d3',0);
+% w = struct('ENd1',0,'ENd2',0,'ENd3',0,'LNd1',0,'LNd2',0','LNd3',0,...
+%     'EN99d1',0,'EN99d2',0,'EN99d3',0,'LN99d1',0,'LN99d2',0,'LN99d3',0);
 
 d1 = find(depthEN < 65);
 d2 = find(depthEN >= 65 & depthEN < 85);
@@ -70,7 +68,7 @@ dpt.ENd1 = dptEN(d1); dpt.ENd2 = dptEN(d2); dpt.ENd3 = dptEN(d3);
 skt.ENd1 = sktEN(d1); skt.ENd2 = sktEN(d2); skt.ENd3 = sktEN(d3);
 rh.ENd1 = rhEN(d1); rh.ENd2 = rhEN(d2); rh.ENd3 = rhEN(d3);
 qv.ENd1 = qvEN(d1); qv.ENd2 = qvEN(d2); qv.ENd3 = qvEN(d3);
-w.ENd1 = wEN(d1); w.ENd2 = wEN(d2); w.ENd3 = wEN(d3);
+% w.ENd1 = wEN(d1); w.ENd2 = wEN(d2); w.ENd3 = wEN(d3);
 
 d1 = find(depthLN < 65);
 d2 = find(depthLN >= 65 & depthLN < 85);
@@ -82,7 +80,7 @@ dpt.LNd1 = dptLN(d1); dpt.LNd2 = dptLN(d2); dpt.LNd3 = dptLN(d3);
 skt.LNd1 = sktLN(d1); skt.LNd2 = sktLN(d2); skt.LNd3 = sktLN(d3);
 rh.LNd1 = rhLN(d1); rh.LNd2 = rhLN(d2); rh.LNd3 = rhLN(d3);
 qv.LNd1 = qvLN(d1); qv.LNd2 = qvLN(d2); qv.LNd3 = qvLN(d3);
-w.LNd1 = wLN(d1); w.LNd2 = wLN(d2); w.LNd3 = wLN(d3);
+% w.LNd1 = wLN(d1); w.LNd2 = wLN(d2); w.LNd3 = wLN(d3);
 
 clear d1 d2 d3 pmaxEN pmaxLN t2mEN t2mLN ii depthEN sstEN sstLN depthLN
 clear en ln dptEN dptLN sktEN sktLN rhEN rhLN qvEN qvLN
@@ -92,67 +90,102 @@ clear en ln dptEN dptLN sktEN sktLN rhEN rhLN qvEN qvLN
 % values from each
 depth = {'d1','d2','d3'};
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% CHANGE BASED ON WHICH TEMPERATURE TO USE FOR SCALING
+% WHICH TEMPERATURE TO USE FOR SCALING
 tstruct = sst;
-% CHANGE BASED ON HOW MANY POINTS TO TAKE FROM EACH BIN
-num = 7;
-% CHANGE BASED ON HOW MANY TEMPERATURE BINS TO SET UP
-num2 = 15;
+% HOW MANY TEMPERATURE BINS
+num = 15; num2 = 5;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for ll = 1:3
     % EL NINO
-    temps = linspace(min(tstruct.(strcat('EN',depth{ll}))),max(tstruct.(strcat('EN',...
-        depth{ll}))),num2);
-    t99 = []; pr99 = []; rh99 = []; qv99 = []; w99 = [];
+    temps = linspace(285,307,num);
+    prQ = []; tQ = []; rhQ = []; qvQ = [];
+    pr99 = []; t99 = []; rh99 = []; qv99 = [];
     for ii = 1:length(temps)-1
         jj = find(tstruct.(strcat('EN',depth{ll})) >= temps(ii) & tstruct.(strcat('EN',...
             depth{ll})) < temps(ii+1));
-        subset = pr.(strcat('EN',depth{ll}))(jj);
-        group = tstruct.(strcat('EN',depth{ll}))(jj);
-        guy = rh.(strcat('EN',depth{ll}))(jj);
-        gal = qv.(strcat('EN',depth{ll}))(jj);
-        kid = w.(strcat('EN',depth{ll}))(jj);
-        [prpr,i] = maxk(subset,num);
+        
+        % read in the relevant values
+        precip = pr.(strcat('EN',depth{ll}))(jj);
+        temperature = tstruct.(strcat('EN',depth{ll}))(jj);
+        relhumidity = rh.(strcat('EN',depth{ll}))(jj);
+        spechumidity = qv.(strcat('EN',depth{ll}))(jj);
+        
+        % calculate the quantiles of the subsets in this bin
+        qpr = quantile(precip,[0.2 0.5 0.75 0.9]);
+        qt = quantile(temperature,[0.2 0.5 0.75 0.9]);
+        qrh = quantile(relhumidity,[0.2 0.5 0.75 0.9]);
+        qqv = quantile(spechumidity,[0.2 0.5 0.75 0.9]);
+        
+        % append the quantiles to their respective lists
+        prQ = [prQ; qpr]; 
+        tQ = [tQ; qt]; 
+        rhQ = [rhQ; qrh];
+        qvQ = [qvQ; qqv];
+        
+        % extract the five largest precip values in each bin and their
+        % correspondings conditions
+        [prpr,i] = maxk(precip,num2);
         pr99 = [pr99, prpr];
-        t99 = [t99, group(i)];
-        rh99 = [rh99, guy(i)];
-        qv99 = [qv99, gal(i)];
-        w99 = [w99, kid(i)];
+        t99 = [t99, temperature(i)];
+        rh99 = [rh99, relhumidity(i)];
+        qv99 = [qv99, spechumidity(i)];   
     end
+    pr.(strcat('ENq',depth{ll})) = prQ; 
+    tstruct.(strcat('ENq',depth{ll})) = tQ; 
+    rh.(strcat('ENq',depth{ll})) = rhQ;
+    qv.(strcat('ENq',depth{ll})) = qvQ;
+    
     pr.(strcat('EN99',depth{ll})) = pr99; 
     tstruct.(strcat('EN99',depth{ll})) = t99; 
     rh.(strcat('EN99',depth{ll})) = rh99;
     qv.(strcat('EN99',depth{ll})) = qv99;
-    w.(strcat('EN99',depth{ll})) = w99;
     
     % LA NINA
-    temps = linspace(min(tstruct.(strcat('LN',depth{ll}))),max(tstruct.(strcat('LN',...
-        depth{ll}))),num2);
-    t99 = []; pr99 = []; rh99 = []; qv99 = []; w99 = [];
+    temps = linspace(285,307,num);
+    prQ = []; tQ = []; rhQ = []; qvQ = [];
+    pr99 = []; t99 = []; rh99 = []; qv99 = [];
     for ii = 1:length(temps)-1
         jj = find(tstruct.(strcat('LN',depth{ll})) >= temps(ii) & tstruct.(strcat('LN',...
             depth{ll})) < temps(ii+1));
-        subset = pr.(strcat('LN',depth{ll}))(jj);
-        group = tstruct.(strcat('LN',depth{ll}))(jj);
-        guy = rh.(strcat('LN',depth{ll}))(jj);
-        gal = qv.(strcat('LN',depth{ll}))(jj);
-        kid = w.(strcat('LN',depth{ll}))(jj);
         
-        [prpr,i] = maxk(subset,num);
-        pr99 = [pr99, subset(i)];
-        t99 = [t99, group(i)];
-        rh99 = [rh99, guy(i)];
-        qv99 = [qv99, gal(i)];
-        w99 = [w99, kid(i)];
+        % read in the relevant values
+        precip = pr.(strcat('LN',depth{ll}))(jj);
+        temperature = tstruct.(strcat('LN',depth{ll}))(jj);
+        relhumidity = rh.(strcat('LN',depth{ll}))(jj);
+        spechumidity = qv.(strcat('LN',depth{ll}))(jj);
+        
+        % calculate the quantiles of the subsets in this bin
+        qpr = quantile(precip,[0.2 0.5 0.75 0.9]);
+        qt = quantile(temperature,[0.2 0.5 0.75 0.9]);
+        qrh = quantile(relhumidity,[0.2 0.5 0.75 0.9]);
+        qqv = quantile(spechumidity,[0.2 0.5 0.75 0.9]);
+        
+        % append the quantiles to their respective lists
+        prQ = [prQ; qpr]; 
+        tQ = [tQ; qt]; 
+        rhQ = [rhQ; qrh];
+        qvQ = [qvQ; qqv];
+        
+        % extract the five largest precip values in each bin and their
+        % correspondings conditions
+        [prpr,i] = maxk(precip,num2);
+        pr99 = [pr99, prpr];
+        t99 = [t99, temperature(i)];
+        rh99 = [rh99, relhumidity(i)];
+        qv99 = [qv99, spechumidity(i)];
     end
+    pr.(strcat('LNq',depth{ll})) = prQ; 
+    tstruct.(strcat('LNq',depth{ll})) = tQ; 
+    rh.(strcat('LNq',depth{ll})) = rhQ;
+    qv.(strcat('LNq',depth{ll})) = qvQ;
+    
     pr.(strcat('LN99',depth{ll})) = pr99; 
     tstruct.(strcat('LN99',depth{ll})) = t99; 
     rh.(strcat('LN99',depth{ll})) = rh99;
     qv.(strcat('LN99',depth{ll})) = qv99;
-    w.(strcat('LN99',depth{ll})) = w99;
 end
-clear depth group subset ii jj ll pr99 t99 temps num num2 guy qv99 rh99 w99
-clear gal kid wEN wLN
+clear depth ii jj pr99 t99 qv99 rh99 prQ tQ rhQ qvQ i ll num num2 precip
+clear qpr qt qrh qqv  prpr relhumidity spechumidity temperature temps
 
 %%
 clf

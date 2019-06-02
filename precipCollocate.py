@@ -8,7 +8,7 @@
 # domain = 'am', 'wa', 'cp'
 # [-5, 5, 165, 190]; [-25, 5, 290, 325]; [0, 20, -10, 50]
 
-def precipCollocate3(ENSO):
+def precipCollocate3_local(ENSO):
     import time,sys,math
     import numpy as np
     import numpy.ma as ma
@@ -73,9 +73,10 @@ def precipCollocate3(ENSO):
     tiempo = np.asarray(num2date(erasst.variables['time'][:],'hours since 1900-01-01 00:00:0.0'))
     
     # load CT data
-    datei  = "../../data/ISCCP/CT-allDataFilteredEdges.npy"
+    #datei  = "../../data/ISCCP/CT-allDataFilteredEdges.npy"
+    datei = "/rigel/home/scs2229/top-secret/MCS_clim/data/ISCCP/CT-allDataLocalTimes.npy"
     CTdata = np.load(datei)
-    DD = np.zeros((CTdata.shape[0],12))
+    DD = np.zeros((CTdata.shape[0],13))
     DD[:,0]  = CTdata[:,7]       # years
     DD[:,1]  = CTdata[:,8]       # months
     DD[:,2]  = CTdata[:,9]       # days
@@ -88,6 +89,7 @@ def precipCollocate3(ENSO):
     DD[:,9]  = CTdata[:,41]      # max lat
     DD[:,10] = CTdata[:,42]      # min lon
     DD[:,11] = CTdata[:,43]      # max lon
+    DD[:,12] = CTdata[:,11]      # size
 
     # filter for the subdomain here
     indx1 = np.argwhere(DD[:,4] <= hilat)
@@ -98,9 +100,25 @@ def precipCollocate3(ENSO):
     indx  = reduce(np.intersect1d,(indx1,indx2,indx3,indx4,indx5))
     DD2   = DD[indx,:]
     del DD
+    print 'Size after filtering for domain: ' + str(DD2.shape)
 
+    # filter only for systems with at least one core here
+    indx1 = np.argwhere(DD2[:,7] >= 1)
+    DD2 = DD2[indx1[:,0]]
+    print 'Size after filtering for single or multi-core systems: ' + str(DD2.shape)
+
+    # filter all hours to the nearest 3-hourly values
+    for ii,row in enumerate(DD2):
+        if int(row[3])%3 != 0:
+           newhour = int(3 * round(float(row[3]/3)))
+    #       print newhour
+    #    else:
+    #       print row[3]
+    #    time.sleep(1)
+    #sys.exit()   
+ 
     # calculate and save an array of precipitation intensities collocated with MCS
-    depth = []; psum = []; pmax = []; ncc = []   # szs = []; life = []; ecc = []
+    depth = []; psum = []; pmax = []; ncc = []; szs = [] # life = []; ecc = []
     for ii in range(len(yrs)):
         print(str(yrs[ii]) + mon[ii])
         ppp   = []
@@ -153,6 +171,7 @@ def precipCollocate3(ENSO):
 		   ppp = np.nansum(grid[:])*3025*10/36.*len(lat)*len(lon)
 		   qqq = np.nanmax(grid[:])
 		   if int(ppp) != 0:
+                      szs.append(subset[kk,12])
 	              depth.append(sstval - subset[kk,6])
 		      ncc.append(subset[kk,7])
                       psum.append(ppp)
@@ -160,16 +179,17 @@ def precipCollocate3(ENSO):
 
     # store the system depth - SST [K], precip vol [m3 s-1], and max precip rate [mm h-1]
     # store the system conv fraction, number of conv cores, precip vol [m3 s-1], and max precip rate [mm h-1]
-    mcsprec = np.zeros((4,len(depth)))
+    mcsprec = np.zeros((3,len(depth)))
     for ii in range(len(depth)):
-        mcsprec[0,ii] = depth[ii] 
-        mcsprec[1,ii] = ncc[ii]
-        mcsprec[2,ii] = psum[ii]
-        mcsprec[3,ii] = pmax[ii]
+        mcsprec[0,ii] = szs[ii]
+#        mcsprec[1,ii] = depth[ii] 
+#        mcsprec[2,ii] = ncc[ii]
+        mcsprec[1,ii] = psum[ii]
+        mcsprec[2,ii] = pmax[ii]
     print(mcsprec.shape)
 
     print('/rigel/home/scs2229/top-secret/MCS_clim/ausgabe/precip_clim/MSWEP/' + \
-          domain + '_depth-SST_psum_pmax_' + period + '.npy')
+          domain + '_size_psum_pmax_' + period + '1.npy')
     np.save('/rigel/home/scs2229/top-secret/MCS_clim/ausgabe/precip_clim/MSWEP/' + \
-          domain + '_depth-SST_psum_pmax_' + period + '.npy',mcsprec)
+          domain + '_size_psum_pmax_' + period + '1.npy',mcsprec)
 

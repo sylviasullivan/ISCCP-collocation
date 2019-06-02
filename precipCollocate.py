@@ -1,20 +1,22 @@
 #!/usr/bin/env mcsplot
-# SAVE THE VECTOR OF (1) MCS SIZE [km^2] (2) ACCUMULATED PRECIP [m^3 s-1] 
-# AND (3) PRECIP INTENSITY [mm h-1] IN A VECTOR FOR THE PHASE DESIGNATED
+# SAVE THE VECTOR OF (1) MCS SIZE [km^2] (2) DEPTH [K] 
+# (3) ACCUMULATED PRECIP [m^3 s-1] AND (4) PRECIP INTENSITY [mm h-1] 
+# IN A VECTOR FOR THE PHASE DESIGNATED
 # BY ENSO AND FOR THE SUBDOMAIN INDICATED BY lowlat-hilat, lowlon-hilon
 
-# ENSO = 'endjf', 'enjja', 'lndjf', 'lnjja'
+# ENSO = 'ENDJF', 'ENJJA', 'LNDJF', 'LNJJA'
 # domain = 'am', 'wa', 'cp'
 # [-5, 5, 165, 190]; [-25, 5, 290, 325]; [0, 20, -10, 50]
 
-def precipCollocate2(ENSO,lowlat,hilat,lowlon,hilon,domain):
+def precipCollocate3(ENSO):
     import time,sys,math
     import numpy as np
     import numpy.ma as ma
     from netCDF4 import Dataset,num2date
     from datetime import datetime,timedelta
     from functools import reduce
-    
+   
+    lowlat = -33; hilat = 33; lowlon = 0; hilon = 360; domain = 'trop' 
     print(ENSO)
     print(domain)
 
@@ -57,19 +59,21 @@ def precipCollocate2(ENSO,lowlat,hilat,lowlon,hilon,domain):
 
 
     # El Nino JJA periods
-    elif(ENSO == 'enjja'):
+    else:
          yrs = [1987,1987,1987,1987,1987,1991,1991,1991,1991,1997,1997,1997,\
                 1997,2002,2002,2002,2004,2004]
          mon = ['05','06','07','08','09','06','07','08','09','06','07','08',\
                 '09','07','08','09','08','09']
          basedir = '../../data/MSWEP-el-nino-yrs/JJA/'
          period  = 'enjja'
-   
-    else:
-         print 'ENSO phase incorrectly designated.'   
- 
+    
+    # SST values
+    erasst = Dataset('/rigel/home/scs2229/top-secret/MCS_clim/data/ERA/ERAint_SST_clim.nc','r+')
+    sst = np.asarray(erasst.variables['sst'])   # size of (294, 181, 360)
+    tiempo = np.asarray(num2date(erasst.variables['time'][:],'hours since 1900-01-01 00:00:0.0'))
+    
     # load CT data
-    datei  = "../../data/ISCCP/CT-allDataLocalTimes.npy"   #FilteredEdges
+    datei  = "../../data/ISCCP/CT-allDataFilteredEdges.npy"
     CTdata = np.load(datei)
     DD = np.zeros((CTdata.shape[0],12))
     DD[:,0]  = CTdata[:,7]       # years
@@ -78,12 +82,8 @@ def precipCollocate2(ENSO,lowlat,hilat,lowlon,hilon,domain):
     DD[:,3]  = CTdata[:,10]      # hours
     DD[:,4]  = CTdata[:,12]      # lat
     DD[:,5]  = CTdata[:,13]      # lon
-    DD[:,6]  = CTdata[:,11]      # radius
-#    DD[:,6]  = CTdata[:,24]      # depth
-#    DD[:,6]  = CTdata[:,17]        # convective fraction
-#    DD[:,7]  = CTdata[:,15]      # eccentricity
-    DD[:,7]  = CTdata[:,5]       # lifetime
-#    DD[:,7]  = CTdata[:,18]       # number of convective cores
+    DD[:,6]  = CTdata[:,24]      # depth
+    DD[:,7]  = CTdata[:,18]      # number of convective cores
     DD[:,8]  = CTdata[:,40]      # min lat
     DD[:,9]  = CTdata[:,41]      # max lat
     DD[:,10] = CTdata[:,42]      # min lon
@@ -100,23 +100,21 @@ def precipCollocate2(ENSO,lowlat,hilat,lowlon,hilon,domain):
     del DD
 
     # calculate and save an array of precipitation intensities collocated with MCS
-    psum = []; szs = []; pmax = []   # life = []; ecc = []
+    depth = []; psum = []; pmax = []; ncc = []   # szs = []; life = []; ecc = []
     for ii in range(len(yrs)):
         print(str(yrs[ii]) + mon[ii])
         ppp   = []
         mswep = Dataset(basedir + 'MSWEP_prec' + str(yrs[ii]) + mon[ii] + '_3h_halfdeg.nc','r+')
         prec  = mswep.variables['precipitation']
         prec  = np.divide(prec,3.)                 # divide by 3 hours for hourly intensity
-        zeit  = num2date(mswep.variables['time'][:],'days since 1899-12-31 00:00:00')
+        zeit  = num2date(mswep.variables['time'][:],'days since 1899-12-31 00:00:00')       
  
         # find the MCS that correspond to this MSWEP time period
-        for jj in np.arange(zeit.shape[0]):
+        for jj in range(zeit.shape[0]):
             indx1  = np.argwhere(DD2[:,0] == zeit[jj].year)
             indx2  = np.argwhere(DD2[:,1] == zeit[jj].month)
             indx3  = np.argwhere(DD2[:,2] == zeit[jj].day)
-            indx4  = np.argwhere((DD2[:,3] < (zeit[jj] + timedelta(hours=2)).hour) & \
-                                 (DD2[:,3] > (zeit[jj] - timedelta(hours=2)).hour))
-            # indx4 = np.argwhere(DD2[:,3] == zeit[jj].hour)
+            indx4  = np.argwhere(DD2[:,3] == zeit[jj].hour)
             indx   = reduce(np.intersect1d,(indx1,indx2,indx3,indx4))  
             subset = DD2[indx,:]
 
@@ -141,33 +139,37 @@ def precipCollocate2(ENSO,lowlat,hilat,lowlon,hilon,domain):
                         if(ss == 720):
                            ss = 0
                         grid[xx,yy] = pr[rr,ss]
+                
+                # calculate the SST from the center lat/lon and time
+                sstval = sst[np.argwhere(tiempo == datetime(int(subset[kk,0]),\
+                         int(subset[kk,1]),1)),int(subset[kk,4])+90,\
+                         int(subset[kk,5])]
 
-                # calculate cumulative and max precip from the grid, store these and MCS values
-                # assume that each 0.5 deg x 0.5 deg cell has an area of 55^2 km2
-                # 10/36. converts from mm h-1 km2 to m3 s-1
-                ppp = np.nansum(grid[:])*3025*10/36.*len(lat)*len(lon)
-                qqq = np.nanmax(grid[:])
-                if int(ppp) != 0:
-                   szs.append(subset[kk,6])
-#                   ctt.append(subset[kk,6])
-#                   life.append(subset[kk,7])
-#                   ecc.append(subset[kk,7])
-                   psum.append(ppp)
-                   pmax.append(qqq)   
+                # invalid sea surface temperatures are stored as -32767
+                if sstval and np.asscalar(sstval) > 200.:
+                   # calculate cumulative and max precip from the grid, store these and MCS values
+		   # assume that each 0.5 deg x 0.5 deg cell has an area of 55^2 km2
+	           # 10/36. converts from mm h-1 km2 to m3 s-1
+		   ppp = np.nansum(grid[:])*3025*10/36.*len(lat)*len(lon)
+		   qqq = np.nanmax(grid[:])
+		   if int(ppp) != 0:
+	              depth.append(sstval - subset[kk,6])
+		      ncc.append(subset[kk,7])
+                      psum.append(ppp)
+		      pmax.append(qqq)   
 
-    # store the system size [km^2], precip vol [m3 s-1], and max precip rate [mm h-1]
+    # store the system depth - SST [K], precip vol [m3 s-1], and max precip rate [mm h-1]
     # store the system conv fraction, number of conv cores, precip vol [m3 s-1], and max precip rate [mm h-1]
-    mcsprec = np.zeros((3,len(szs))) #,len(ctt))) #szs)))
-    for ii in range(len(szs)):   #ctt)):
-        #mcsprec[0,ii] = ctt[ii]
-        #mcsprec[1,ii] = life[ii]
-        mcsprec[0,ii] = szs[ii]
-        mcsprec[1,ii] = psum[ii]
-        mcsprec[2,ii] = pmax[ii]
+    mcsprec = np.zeros((4,len(depth)))
+    for ii in range(len(depth)):
+        mcsprec[0,ii] = depth[ii] 
+        mcsprec[1,ii] = ncc[ii]
+        mcsprec[2,ii] = psum[ii]
+        mcsprec[3,ii] = pmax[ii]
     print(mcsprec.shape)
 
     print('/rigel/home/scs2229/top-secret/MCS_clim/ausgabe/precip_clim/MSWEP/' + \
-          domain + '_size_psum_pmax_' + period + '.npy')   #_depth_life_
+          domain + '_depth-SST_psum_pmax_' + period + '.npy')
     np.save('/rigel/home/scs2229/top-secret/MCS_clim/ausgabe/precip_clim/MSWEP/' + \
-          domain + '_size_psum_pmax_' + period + '.npy',mcsprec)  #_depth_life_
+          domain + '_depth-SST_psum_pmax_' + period + '.npy',mcsprec)
 

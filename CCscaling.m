@@ -112,11 +112,12 @@ for ll = 1:3
         guy = rh.(strcat('EN',depth{ll}))(jj);
         gal = qv.(strcat('EN',depth{ll}))(jj);
         kid = w.(strcat('EN',depth{ll}))(jj);
-        pr99 = [pr99, maxk(subset,num)];
-        t99 = [t99, maxk(group,num)];
-        rh99 = [rh99, maxk(guy,num)];
-        qv99 = [qv99, maxk(gal,num)];
-        w99 = [w99, mink(kid,num)];
+        [prpr,i] = maxk(subset,num);
+        pr99 = [pr99, prpr];
+        t99 = [t99, group(i)];
+        rh99 = [rh99, guy(i)];
+        qv99 = [qv99, gal(i)];
+        w99 = [w99, kid(i)];
     end
     pr.(strcat('EN99',depth{ll})) = pr99; 
     tstruct.(strcat('EN99',depth{ll})) = t99; 
@@ -136,11 +137,13 @@ for ll = 1:3
         guy = rh.(strcat('LN',depth{ll}))(jj);
         gal = qv.(strcat('LN',depth{ll}))(jj);
         kid = w.(strcat('LN',depth{ll}))(jj);
-        pr99 = [pr99, maxk(subset,num)];
-        t99 = [t99, maxk(group,num)];
-        rh99 = [rh99, maxk(guy,num)];
-        qv99 = [qv99, maxk(gal,num)];
-        w99 = [w99, mink(kid,num)];
+        
+        [prpr,i] = maxk(subset,num);
+        pr99 = [pr99, subset(i)];
+        t99 = [t99, group(i)];
+        rh99 = [rh99, guy(i)];
+        qv99 = [qv99, gal(i)];
+        w99 = [w99, kid(i)];
     end
     pr.(strcat('LN99',depth{ll})) = pr99; 
     tstruct.(strcat('LN99',depth{ll})) = t99; 

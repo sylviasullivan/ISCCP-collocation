@@ -1,7 +1,3 @@
-#!/usr/bin/env mcsplot
-# UNDERSTAND THE SENSITIVITY OF THE PMAX AND PTOT
-# TRENDS TO BINNING
-
 import sys,pickle,time
 import numpy as np
 import datetime
@@ -15,10 +11,8 @@ import pandas as pd
 season = 'DJF'
 enso   = 'endjf'
 gebiet = [-33,33,0,360,'trop']
-#execfile('../precip/MidpointNormalize.py')
 
 # read in the values
-#basedir = '/rigel/home/scs2229/top-secret/MCS_clim/'
 basedir = '/work/bb1018/b380873/MCS_clim/'
 fich1 = basedir + 'ausgabe/precip_clim/old-output/trop_depth_psum_pmax_endjf.npy'
 fich2 = basedir + 'ausgabe/precip_clim/old-output/trop_depth_psum_pmax_lndjf.npy'
@@ -103,10 +97,6 @@ for c in np.arange(0,2):
         gg = np.divide(gg,float(kk.shape[0]))
         rd[ii] = ma.masked_where(gg == 0,(hh-gg)/gg*100.)
         rd[ii] = ma.masked_where(hh == 0,rd[ii])
-    if rd[0,8] > 0:
-       rd[0,8] = rd[0,8]*-1
-    if rd[0,9] > 0:
-       rd[0,9] = rd[0,9]*-1
     ww = np.asarray([(xval2[i]-xval2[i-1])/2. for i in np.arange(1,len(xval2))])
     plt.bar(xval2[:-1],rd[0],width=ww,color=farbe[0],align='center',edgecolor='black',label=lbl[0])
     plt.bar(xval2[:-1],rd[1],width=ww,color=farbe[1],align='center',edgecolor='black',label=lbl[1])

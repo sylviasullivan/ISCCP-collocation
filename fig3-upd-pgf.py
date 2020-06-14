@@ -1,4 +1,3 @@
-#!/usr/bin/env mcsplot
 import sys,pickle,time
 import numpy as np
 from datetime import datetime
@@ -11,7 +10,6 @@ from scipy.io import loadmat
 import scipy.stats
 import scipy.integrate as integrate
 
-#basedir3 = '/rigel/home/scs2229/top-secret/MCS_clim/scripts/figs/drag/'
 basedir3 = '/work/bb1018/b380873/MCS_clim/scripts/figs/drag/'
 
 # if you want to regenerate the El Nino, La Nina, and climatological mean profiles
@@ -25,8 +23,6 @@ def mean_confidence_interval(data,confidence):
 
 makedata = False
 filterdata = False
-#basedir = '/rigel/home/scs2229/top-secret/MCS_clim/ausgabe/meteo_clim/updrafts/other/'
-#basedir2 = '/rigel/home/scs2229/top-secret/MCS_clim/ausgabe/precip_clim/divergence/core/'
 basedir = '/work/bb1018/b380873/MCS_clim/ausgabe/meteo_clim/updrafts/other/'
 basedir2 = '/work/bb1018/b380873/MCS_clim/ausgabe/meteo_clim/divergence/core/'
 
@@ -72,9 +68,6 @@ wlo[2] = np.percentile(ENDJFww3,99.99,axis=0)
 wlo[3] = np.percentile(LNDJFww1,99.99,axis=0)
 wlo[4] = np.percentile(LNDJFww2,99.99,axis=0)
 wlo[5] = np.percentile(LNDJFww3,99.99,axis=0)
-print press[np.argwhere(whi[0] == np.nanmin(whi[0]))[:,0]]
-print press[np.argwhere(whi[3] == np.nanmin(whi[3]))[:,0]]
-#[10:22]
 
 fig = plt.figure(figsize=(9.25,10))
 
@@ -107,12 +100,6 @@ ax2.plot(whi[3],press,color='blue',linewidth=1.25,linestyle='--',label='LN - dep
 ax2.plot(whi[4],press,color='green',linewidth=1.25,linestyle='--',label='LN - 65 K $<$ depth $\leq$ 85 K - 99th')
 ax2.plot(whi[5],press,color='red',linewidth=1.25,linestyle='--',label='LN - depth $>$ 85 K - 99th')
 
-#ax2.plot(wlo[0],press,color='blue',linewidth=1.25)
-#ax2.plot(wlo[1],press,color='green',linewidth=1.25)
-#ax2.plot(wlo[2],press,color='red',linewidth=1.25)
-#ax2.plot(wlo[3],press,color='blue',linewidth=1.25,linestyle='--')
-#ax2.plot(wlo[4],press,color='green',linewidth=1.25,linestyle='--')
-#ax2.plot(wlo[5],press,color='red',linewidth=1.25,linestyle='--')
 ax2.tick_params(axis='both',labelsize=fs+1)
 plt.ylim([y2,y1])
 plt.xlim([-5,0.25])
@@ -197,9 +184,6 @@ ax4.set_ylim([0,20])
 plt.text(0.05,0.92,'(d)',fontsize=fs+3,fontweight='bold',transform=ax4.transAxes)
 fig.text(0.5, 0.04, r'Integrated pressure gradient force ($\dot{P}_{99}$) [m$^2$ s$^{-2}$]', ha='center',\
    fontsize=fs+2)
-#plt.xlabel(r'Integrated pressure gradient '
-#            '\n'
-#           r'force [m$^2$ s$^{-2}$]',fontsize=fs+3)
 plt.xlim([u,d])
 
 fig.subplots_adjust(wspace=0.2)

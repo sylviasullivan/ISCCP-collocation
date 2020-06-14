@@ -1,24 +1,15 @@
-#!/usr/bin/env mcsplot
-# CREATE THE DIFFERENCE IN JOINT DISTRIBUTIONS OF MCS SIZE AND
-# PTOT (PRECIPITATION ACCUMULATION) OR PMAX AND PTOT FOR A CERTAIN
-# SUBDOMAIN AND SEASON.
-
 import sys,pickle,time
 import numpy as np
 import numpy.ma as ma
 import datetime
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
-#import cartopy.crs as ccrs
 from mpl_toolkits.basemap import Basemap
 import matplotlib.cm as cm
 import numpy.ma as ma
 import pandas as pd
 
-#execfile('../precip/MidpointNormalize.py')
 basedir = '/work/bb1018/b380873/MCS_clim/ausgabe/precip_clim/old-output/'
-#fich1 = basedir + 'trop_depth-SST_psum_pmax_endjf.npy'
-#fich2 = basedir + 'trop_depth-SST_psum_pmax_lndjf.npy'
 fich1 = basedir + 'trop_depth_psum_pmax_endjf.npy'
 fich2 = basedir + 'trop_depth_psum_pmax_lndjf.npy'
 
@@ -63,7 +54,7 @@ for ii in np.arange(3):
     rd[ii] = ma.masked_where(gg == 0,(hh-gg)/gg*100.)
     rd[ii] = ma.masked_where(hh == 0,rd[ii])
     rd[ii+3] = (hh - gg)*100.
-rd[0,8] = -1*rd[0,8]
+
 ww = np.asarray([(xval2[i]-xval2[i-1])/2 for i in np.arange(1,len(xval2))])
 # where the deepest has the smallest relative difference
 mask1 = np.argwhere((abs(rd[2]) < abs(rd[1])) | (abs(rd[2]) < abs(rd[0])))
@@ -83,24 +74,6 @@ plt.gca().tick_params(axis='both',which='both',labelsize=fs)
 plt.legend(fontsize=ticfont,loc='center left')
 plt.ylabel(r'Relative $\Delta p$ (EN-LN)/LN [%]',fontsize=fs)
 plt.xlabel(r'$\dot{P}$ [mm h$^{-1}$]',fontsize=fs)
-
-#plt.subplot2grid((2,2),(1,0))
-#ww = np.asarray([(xval2[i]-xval2[i-1])/2 for i in np.arange(1,len(xval2))])
-## where the least deep has the smallest relative difference
-#mask1 = np.argwhere((abs(rd[3]) < abs(rd[4])) | (abs(rd[3]) < abs(rd[5])))
-## where the intermediate has the smallest relative difference
-#mask2 = np.argwhere((abs(rd[4]) < abs(rd[3])) | (abs(rd[4]) < abs(rd[5])))
-#ex = xval2[:-1]
-#plt.bar(ex,rd[3],width=ww,color=farbe[0],edgecolor='black',align='center')
-#plt.bar(ex,rd[4],width=ww,color=farbe[1],edgecolor='black',align='center')
-#plt.bar(ex,rd[5],width=ww,color=farbe[2],edgecolor='black',align='center')
-#plt.bar(ex[mask2[:,0]],rd[4,mask2[:,0]],width=ww[mask2[:,0]],color=farbe[1],edgecolor='black',align='center')
-#plt.text(0.05,0.9,'(b)',fontsize=fs+2,fontweight='bold',transform=plt.gca().transAxes)
-#plt.xscale('log')
-#plt.ylim([-2,2])
-#plt.gca().tick_params(axis='both',which='both',labelsize=fs)
-#plt.xlabel(r'$\dot{P}$ [mm h$^{-1}$]',fontsize=fs)
-#plt.ylabel(r'Absolute $\Delta p$ (EN-LN) [%]',fontsize=fs)
 
 basedir = '/work/bb1018/b380873/MCS_clim/ausgabe/props_clim/'
 d1 = np.load(basedir + 'd1_map.npy')

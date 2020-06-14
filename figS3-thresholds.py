@@ -1,7 +1,3 @@
-#!/usr/bin/env mcsplot
-# UNDERSTAND THE SENSITIVITY OF THE PMAX AND PTOT
-# TRENDS TO BINNING
-
 import sys,pickle,time
 import numpy as np
 import datetime
@@ -10,11 +6,6 @@ import matplotlib.colors as colors
 from matplotlib.colors import SymLogNorm,LogNorm
 import numpy.ma as ma
 import pandas as pd
-
-# read in the values
-#basedir = '/rigel/home/scs2229/top-secret/MCS_clim/'
-#fich1 = basedir + 'ausgabe/precip_clim/old-output/trop_depth-SST_psum_pmax_endjf.npy'
-#fich2 = basedir + 'ausgabe/precip_clim/old-output/trop_depth-SST_psum_pmax_lndjf.npy'
 
 basedir = '/work/bb1018/b380873/MCS_clim/ausgabe/precip_clim/old-output/'
 fich1 = basedir + 'trop_depth_psum_pmax_endjf.npy'
@@ -65,10 +56,6 @@ for c in np.arange(0,2):
            plt.xlabel(r'$\dot{P}$ [mm h$^{-1}$]',fontsize=axfont)
         if c == 0:
            plt.legend(fontsize=axfont,loc=9)
-    if rd[0,9] > 0:
-       rd[0,9] = rd[0,9]*-1
-    if rd[0,8] > 0:
-       rd[0,8] = rd[0,8]*-1
     ww = np.asarray([(xval2[i]-xval2[i-1])/2.5 for i in np.arange(1,len(xval2))])
     plt.bar(xval2[:-1],rd[0],width=ww,align='center',color=farbe[0],edgecolor='black',label=lbl[0])
     plt.bar(xval2[:-1],rd[1],width=ww,align='center',color=farbe[1],edgecolor='black',label=lbl[1])
@@ -104,10 +91,6 @@ for c in np.arange(0,2):
         ww = np.asarray([(xval2[i]-xval2[i-1])/2. for i in np.arange(1,len(xval2))])
         rd[ii] = ma.masked_where(gg == 0,(hh-gg)/gg*100.)
         rd[ii] = ma.masked_where(hh == 0,rd[ii])
-    if rd[0,9] > 0:
-       rd[0,9] = rd[0,9]*-1
-    if rd[0,8] > 0:
-       rd[0,8] = rd[0,8]*-1
     plt.bar(xval2[:-1],rd[0],width=ww,color=farbe[0],align='center',edgecolor='black',label=lbl[c+2][0])
     plt.bar(xval2[:-1],rd[1],width=ww,color=farbe[1],align='center',edgecolor='black',label=lbl[c+2][1])
     plt.bar(xval2[:-1],rd[2],width=ww,color=farbe[2],align='center',edgecolor='black',label=lbl[c+2][2])

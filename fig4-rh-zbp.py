@@ -1,4 +1,3 @@
-#!/usr/bin/env mcsplot
 import sys,pickle,time
 import numpy as np
 from datetime import datetime
@@ -31,8 +30,6 @@ press = np.asarray([122.6137,142.9017,165.0886,189.1466,215.0251,242.6523,272.05
          1002.0236])
 
 fig = plt.figure(figsize=(9,6))
-#basedir = '/rigel/home/scs2229/top-secret/MCS_clim/ausgabe/meteo_clim/temperature/core/'
-#basedir2 = '/rigel/home/scs2229/top-secret/MCS_clim/ausgabe/meteo_clim/qv/core/'
 basedir = '/work/bb1018/b380873/MCS_clim/ausgabe/meteo_clim/temperature/core/'
 basedir2 = '/work/bb1018/b380873/MCS_clim/ausgabe/meteo_clim/qv/core/'
 
@@ -112,14 +109,9 @@ buoyRH = data['buoyRH']
 #95% confidence interval
 data2 = loadmat('article9-reviews/buoyzbp_1ent_coincid_CI95.mat')
 ci95 = data2['yCI95']
-#ax3.fill_betweenx(press,buoy[0]-ci95[:,0],buoy[0]+ci95[:,0],color='blue',alpha=0.25)
-#plt.plot(buoy[0],press,linewidth=1.25,color='blue')
-#plt.plot(buoy[3],press,linewidth=1.25,color='blue',linestyle='--')
 print(buoy[2]/buoy[5])
 ax3.fill_betweenx(press,buoy[2]-ci95[:,2],buoy[2]+ci95[:,2],color='red',alpha=0.25)
 ax3.fill_betweenx(press,buoy[5]-ci95[:,5],buoy[5]+ci95[:,5],color='blue',alpha=0.25)
-#plt.plot(buoy[1],press,linewidth=1.25,color='green')
-#plt.plot(buoy[4],press,linewidth=1.25,color='green',linestyle='--')
 plt.plot(buoy[2],press,linewidth=1.25,color='red')
 plt.plot(buoy[5],press,linewidth=1.25,color='blue')
 plt.text(0.05,0.9,'(b)',fontsize=fs+3,fontweight='bold',transform=ax3.transAxes)
@@ -135,41 +127,20 @@ plt.gca().invert_yaxis()
 # ZBP CALC DIFFERENCES
 ax4 = plt.subplot2grid((2,2),(1,1))
 ax4.tick_params(axis='both',labelsize=fs)
-#plt.plot(buoy[0]-buoy[3],press,linewidth=1.25,color=[0,0,1],linestyle='-')
-#plt.plot(buoyRH[0]-buoyRH[3],press,linewidth=1.25,color='cyan',linestyle='--')
-#plt.plot(buoyT[0]-buoyT[3],press,linewidth=1.25,color=[0,0,0.5],linestyle='-.')
 
 plt.plot(buoyRH[2]-buoyRH[5],press,linewidth=1.25,color='pink',linestyle='--')
 plt.plot(buoy[2]-buoy[5]-(buoyRH[2]-buoyRH[5]),press,linewidth=1.25,color='maroon',linestyle='-.')
 plt.plot(buoy[2]-buoy[5],press,linewidth=1.25,color='red',linestyle='-')
-#print buoyRH[2]-buoyRH[5]
-#print buoyT[2]-buoyT[5]
 
-#plt.plot([0,0],[300,1000],linewidth=0.75,color='black',linestyle='--')
 plt.text(0.17,0.9,'(c)',fontsize=fs+3,fontweight='bold',transform=ax4.transAxes)
 plt.text(0.14,750,'Combined',fontsize=fs,color='red')
 plt.text(0.14,850,'Effect of RH',fontsize=fs,color='maroon')
 plt.text(0.14,950,'Effect of T',fontsize=fs,color='pink')
 plt.xlabel(r'El Ni$\~n$o-La Ni$\~n$a $\Delta$ Buoyancy ($\dot{P}_{99}$) [m s$^{-2}$]',fontsize=fs+1)
 plt.ylabel('Pressure [hPa]',fontsize=fs+1)
-#r1 = Rectangle((0.15,700),0.04,20,facecolor='blue')
-#r3 = Rectangle((0.18,700),0.04,20,facecolor='red')
-#r4 = Rectangle((0.15,800),0.04,20,facecolor=[0,0,0.5])
-#r6 = Rectangle((0.18,800),0.04,20,facecolor=[0.5,0,0])
-#r7 = Rectangle((0.15,900),0.04,20,facecolor='cyan')
-#r9 = Rectangle((0.18,900),0.04,20,facecolor=[1,0.6,0.4])
-#ax4.add_patch(r1); #ax4.add_patch(r2); 
-#ax4.add_patch(r3)
-#ax4.add_patch(r4); #ax4.add_patch(r5); 
-#ax4.add_patch(r6)
-#ax4.add_patch(r7); #ax4.add_patch(r8); 
-#ax4.add_patch(r9)
-#plt.ylim([300,1000])
 plt.xlim([-0.02,0.23])
 plt.gca().invert_yaxis()
-#plt.yticks([400,600,800,1000])
 
-#fig.subplots_adjust(wspace=0.2)
 plt.tight_layout()
-#fig.savefig('./figures/fig4-rh_zbp_ci95.pdf',bbox_inches='tight')
+fig.savefig('./figures/fig4-rh_zbp_ci95.pdf',bbox_inches='tight')
 plt.show()
